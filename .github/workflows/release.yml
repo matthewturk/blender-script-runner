@@ -13,6 +13,8 @@ permissions:
 
 env:
   BLENDER_VERSION: "5.2.3"
+  # Outside the checkout: the build zips everything under the source dir.
+  BLENDER_DIR: ${{ github.workspace }}/../blender
 
 jobs:
   build:
@@ -32,16 +34,16 @@ jobs:
         id: blender-cache
         uses: actions/cache@v4
         with:
-          path: blender
+          path: ${{ env.BLENDER_DIR }}
           key: blender-${{ env.BLENDER_VERSION }}-linux-x64
 
       - name: Download Blender
         if: steps.blender-cache.outputs.cache-hit != 'true'
         run: |
           minor=${BLENDER_VERSION%.*}
-          mkdir blender
+          mkdir -p "$BLENDER_DIR"
           curl -fsSL "https://download.blender.org/release/Blender$minor/blender-$BLENDER_VERSION-linux-x64.tar.xz" \
-            | tar -xJ --strip-components=1 -C blender
+            | tar -xJ --strip-components=1 -C "$BLENDER_DIR"
 
       # Blender links these X/GL libraries even in background mode.
       - name: Install Blender's runtime libraries
@@ -52,9 +54,10 @@ jobs:
 
       - name: Validate and build the extension
         run: |
-          blender/blender --command extension validate .
+          "$BLENDER_DIR/blender" --command extension validate .
           mkdir -p dist
-          blender/blender --command extension build --source-dir . --output-dir dist
+          "$BLENDER_DIR/blender" --command extension build --source-dir . --output-dir dist
+          unzip -l dist/*.zip
 
       - uses: actions/upload-artifact@v4
         with:
