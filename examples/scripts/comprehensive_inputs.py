@@ -2,6 +2,8 @@ import bpy
 import os
 
 # Comprehensive parameter dictionary mapping standard UI types to Blender properties
+DESCRIPTION = "Show every parameter type the dialog supports."
+
 PARAMS = {
     # Basic Numeric & Boolean Types
     "grid_size": {

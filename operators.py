@@ -1,3 +1,5 @@
+import textwrap
+
 import bpy
 
 from . import params as params_mod
@@ -117,6 +119,17 @@ class NODE_OT_reload_node_scripts(bpy.types.Operator):
         return {"FINISHED"}
 
 
+def _draw_description(layout, kind, name):
+    module = registry.modules[kind].get(name)
+    text = registry.description(module) if module is not None else ""
+    if not text:
+        return
+    col = layout.column(align=True)
+    col.scale_y = 0.8
+    for line in textwrap.wrap(text, 60):
+        col.label(text=line)
+
+
 class SCRIPT_OT_browser(bpy.types.Operator):
     """Open the script & node tree browser"""
     bl_idname = "script_runner.browser"
@@ -136,6 +149,7 @@ class SCRIPT_OT_browser(bpy.types.Operator):
         row.operator(SR_OT_reload_scripts.bl_idname, icon="FILE_REFRESH", text="")
         selected = scene.dynamic_script_runner.selected_script
         if selected in registry.modules[SCRIPTS]:
+            _draw_description(box, SCRIPTS, selected)
             box.operator(registry.operator_idname(selected), text="Configure & Run", icon="PLAY")
 
         box = self.layout.box()
@@ -145,6 +159,7 @@ class SCRIPT_OT_browser(bpy.types.Operator):
         row.operator(NODE_OT_reload_node_scripts.bl_idname, icon="FILE_REFRESH", text="")
         selected_node = scene.node_script_runner.selected_script
         if selected_node in registry.modules[NODES]:
+            _draw_description(box, NODES, selected_node)
             box.operator(
                 NODE_OT_run_script.bl_idname, text="Build Node Tree", icon="PLAY"
             ).script_name = selected_node

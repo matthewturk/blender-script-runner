@@ -25,6 +25,7 @@ browser, and when the folder list changes.
 ## Scripts
 
 ```python
+DESCRIPTION = "Fill a collection with a grid of cubes"  # optional, see below
 PARAMS = {
     "label": "Generate Grid",  # optional: name in the menu
     "size": {"type": "INT", "default": 10, "min": 1, "name": "Grid Size"},
@@ -36,6 +37,10 @@ def execute(context, params):
     return {"FINISHED"}
 ```
 
+`DESCRIPTION` is shown under the script in the browser and as the tooltip on
+its menu entry and Run button. Without one, the first paragraph of the
+script's docstring is used.
+
 Each script gets an operator, `script_runner.dynamic_<file name>`, so it can
 also be bound to a key or added to Quick Favorites.
 
@@ -43,6 +48,7 @@ also be bound to a key or added to Quick Favorites.
 
 ```python
 NAME = "Passthrough"  # node group name (default: from the file name)
+DESCRIPTION = "Pass the geometry through unchanged"  # optional
 PARAMS = {}           # optional, same format as above
 
 def build(tree, params):

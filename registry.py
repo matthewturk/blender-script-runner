@@ -117,6 +117,13 @@ def label(kind, name, module):
     return getattr(module, "NAME", name.replace("_", " ").title())
 
 
+def description(module):
+    """A script's DESCRIPTION, or else the first paragraph of its docstring,
+    on one line ("" if it has neither)."""
+    text = getattr(module, "DESCRIPTION", None) or (module.__doc__ or "").strip().split("\n\n")[0]
+    return " ".join(str(text).split())
+
+
 def _unregister_dynamic(kind):
     for cls in reversed(_dynamic_classes[kind]):
         attr = getattr(cls, "_scene_attr", None)
@@ -160,6 +167,7 @@ def _make_script_operator(name, module):
     return type(f"SR_OT_dynamic_{name}", (bpy.types.Operator,), {
         "bl_idname": operator_idname(name),
         "bl_label": f"Run {label(SCRIPTS, name, module)}",
+        "bl_description": description(module) or f"Run {label(SCRIPTS, name, module)}",
         "bl_options": {"REGISTER", "UNDO"},
         "execute": execute,
         "invoke": invoke,
@@ -173,7 +181,8 @@ def reload(kind):
     modules[kind] = scan(kind)
     verb = "Run" if kind == SCRIPTS else "Build"
     enum_items[kind] = [
-        (name, label(kind, name, module), f"{verb} {getattr(module, '__file__', name)}")
+        (name, label(kind, name, module),
+         description(module) or f"{verb} {getattr(module, '__file__', name)}")
         for name, module in modules[kind].items()
     ]
     for name, module in modules[kind].items():

@@ -3,6 +3,8 @@
 import bpy
 
 # The master UI will read this dictionary to build your inputs automatically
+DESCRIPTION = "Generate a grid of objects, optionally as cubes."
+
 PARAMS = {
     "grid_size": {"type": "INT", "default": 10, "min": 1, "max": 100, "name": "Grid Size"},
     "use_cubes": {"type": "BOOL", "default": True, "name": "Instantiate Cubes"},
