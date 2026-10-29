@@ -89,4 +89,9 @@ blender --command extension build      # writes script_runner-<version>.zip
 blender --command extension validate
 ```
 
+Pushing a `v*` tag (e.g. `v2.0.1`) builds the zip on GitHub Actions and
+attaches it to a GitHub release. The tag has to match `version` in
+`blender_manifest.toml`, or the build fails. Pull requests and manual runs
+only build the zip, as a downloadable workflow artifact.
+
 License: GPL-3.0-or-later.

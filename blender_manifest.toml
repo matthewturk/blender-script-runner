@@ -21,6 +21,8 @@ files = "Imports and runs Python scripts from folders you choose"
 paths_exclude_pattern = [
   "__pycache__/",
   "/.git/",
+  "/.github/",
+  "/dist/",
   "/tests/",
   "*.zip",
   "/.gitignore",
