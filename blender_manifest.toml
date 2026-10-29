@@ -1,0 +1,27 @@
+schema_version = "1.0.0"
+
+id = "script_runner"
+version = "2.0.0"
+name = "Script Runner"
+tagline = "Run parameterized scripts and node-tree builders from folders"
+maintainer = "Matthew Turk <mjturk@illinois.edu>"
+type = "add-on"
+
+tags = ["Development", "Node"]
+
+blender_version_min = "4.2.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2026 Matthew Turk"]
+
+[permissions]
+files = "Imports and runs Python scripts from folders you choose"
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  "/.git/",
+  "/tests/",
+  "*.zip",
+  "/.gitignore",
+]
