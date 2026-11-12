@@ -26,6 +26,7 @@ class SCRIPT_RUNNER_PG_folder(bpy.types.PropertyGroup):
         items=(
             (registry.SCRIPTS, "Scripts", "Scripts with PARAMS and execute(context, params)"),
             (registry.NODES, "Node Scripts", "nodebpy builders with build(tree, params)"),
+            (registry.GROUPS, "Node Groups", "nodebpy group classes, defined in every file that lacks them"),
         ),
         update=_folders_changed,
     )
@@ -63,6 +64,12 @@ class ScriptRunnerPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
     folders: bpy.props.CollectionProperty(type=SCRIPT_RUNNER_PG_folder)
+    define_node_groups_on_load: bpy.props.BoolProperty(
+        name="Define Node Groups on Load",
+        description="After Blender starts and whenever a file is opened, create the groups "
+                    "from the Node Groups folders that the file doesn't have yet",
+        default=True,
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -75,10 +82,12 @@ class ScriptRunnerPreferences(bpy.types.AddonPreferences):
         row = layout.row(align=True)
         row.operator(SCRIPT_RUNNER_OT_folder_add.bl_idname, text="Add Script Folder", icon="ADD").kind = registry.SCRIPTS
         row.operator(SCRIPT_RUNNER_OT_folder_add.bl_idname, text="Add Node Script Folder", icon="ADD").kind = registry.NODES
+        row.operator(SCRIPT_RUNNER_OT_folder_add.bl_idname, text="Add Node Group Folder", icon="ADD").kind = registry.GROUPS
+        layout.prop(self, "define_node_groups_on_load")
 
         box = layout.box()
         box.label(text="Always scanned as well:")
-        for kind in (registry.SCRIPTS, registry.NODES):
+        for kind in (registry.SCRIPTS, registry.NODES, registry.GROUPS):
             for folder in registry.folders(kind)[:1]:
                 box.label(text=f"{kind.title()}: {folder}")
 

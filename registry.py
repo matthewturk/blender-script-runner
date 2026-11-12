@@ -1,11 +1,13 @@
 """Find, load and register scripts from the configured folders.
 
-Two kinds of script live in separate folders:
+Three kinds of script live in separate folders:
 
 SCRIPTS  define PARAMS and execute(context, params); each gets its own
          operator (script_runner.dynamic_<name>) with a dialog for PARAMS.
 NODES    define build(tree, params) and optionally NAME and PARAMS; the
          Build Node Tree operator runs build() inside a nodebpy tree.
+GROUPS   define nodebpy Custom*Group classes; node_groups.py creates their
+         groups in every file that lacks them.
 
 Scripts are loaded only when the folders are scanned (at startup, on
 Refresh, or when the folder list changes), never while the UI draws.
@@ -22,11 +24,12 @@ from . import params as params_mod
 
 SCRIPTS = "SCRIPTS"
 NODES = "NODES"
+GROUPS = "GROUPS"  # node_groups.py: files of nodebpy group classes, defined on load
 
 # Scene property / class prefixes. Kept identical to the original startup
 # runner so values saved in existing .blend files are picked up.
 PROP_PREFIX = {SCRIPTS: "sr_props", NODES: "nsr_props"}
-DEFAULT_SUBDIR = {SCRIPTS: "scripts", NODES: "node_scripts"}
+DEFAULT_SUBDIR = {SCRIPTS: "scripts", NODES: "node_scripts", GROUPS: "node_groups"}
 MODULE_PREFIX = "script_runner_loaded"
 
 # name -> loaded module, and the matching EnumProperty items (Blender

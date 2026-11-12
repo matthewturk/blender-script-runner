@@ -164,6 +164,12 @@ class SCRIPT_OT_browser(bpy.types.Operator):
                 NODE_OT_run_script.bl_idname, text="Build Node Tree", icon="PLAY"
             ).script_name = selected_node
 
+        box = self.layout.box()
+        box.label(text="Node Groups", icon="NODE")
+        row = box.row(align=True)
+        row.operator("script_runner.define_node_groups", text="Add Missing", icon="ADD").rebuild = False
+        row.operator("script_runner.define_node_groups", text="Rebuild All", icon="FILE_REFRESH").rebuild = True
+
         if not registry.modules[SCRIPTS] and not registry.modules[NODES]:
             self.layout.label(text="No scripts found. Add folders in the add-on preferences.", icon="INFO")
 

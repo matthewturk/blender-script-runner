@@ -1,17 +1,32 @@
 """Script Runner: run parameterized Python scripts and nodebpy node-tree
 builders from folders you choose, with a generated dialog for each script's
-PARAMS. See README.md for the script format."""
+PARAMS, and keep node groups as Python files that are defined in every file
+you open. See README.md for the script format."""
 
 import bpy
+from bpy.app.handlers import persistent
 
-from . import operators, preferences, registry
+from . import node_groups, operators, preferences, registry
 
-_classes = preferences.classes + operators.classes
+_classes = preferences.classes + operators.classes + node_groups.classes
+
+
+def _define_groups_enabled():
+    addon = bpy.context.preferences.addons.get(__package__)
+    return addon is None or addon.preferences.define_node_groups_on_load
 
 
 def _reload_on_startup():
     registry.reload_all()
+    if _define_groups_enabled():
+        node_groups.define_quietly()
     return None
+
+
+@persistent
+def _define_groups_on_load(*_args):
+    if _define_groups_enabled():
+        node_groups.define_quietly()
 
 
 def register():
@@ -26,6 +41,8 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.Scene.dynamic_script_runner = bpy.props.PointerProperty(type=operators.DynamicScriptSettings)
     bpy.types.Scene.node_script_runner = bpy.props.PointerProperty(type=operators.NodeScriptSettings)
+    bpy.types.NODE_MT_context_menu.append(node_groups.draw_context_menu)
+    bpy.app.handlers.load_post.append(_define_groups_on_load)
     # Scan after startup finishes, once preferences are loaded.
     bpy.app.timers.register(_reload_on_startup, first_interval=0.5)
 
@@ -33,6 +50,9 @@ def register():
 def unregister():
     if bpy.app.timers.is_registered(_reload_on_startup):
         bpy.app.timers.unregister(_reload_on_startup)
+    if _define_groups_on_load in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(_define_groups_on_load)
+    bpy.types.NODE_MT_context_menu.remove(node_groups.draw_context_menu)
     registry.unregister()
     del bpy.types.Scene.dynamic_script_runner
     del bpy.types.Scene.node_script_runner

@@ -2,7 +2,8 @@
 
 A Blender extension that runs parameterized Python scripts and
 [nodebpy](https://pypi.org/project/nodebpy/) node-tree builders from folders
-you choose. Each script declares its inputs in a `PARAMS` dict, and Script
+you choose, and keeps node groups as Python files instead of assets.
+Each script declares its inputs in a `PARAMS` dict, and Script
 Runner turns that into a dialog, so a script can expose settings without any
 UI code.
 
@@ -11,7 +12,7 @@ Open it from the 3D Viewport sidebar: **Script Runner > Open Script Browser**.
 ## Script folders
 
 Set folders in **Preferences > Add-ons > Script Runner**. Each folder is
-either *Scripts* or *Node Scripts*. Folders are not scanned recursively, and
+*Scripts*, *Node Scripts* or *Node Groups*. Folders are not scanned recursively, and
 files starting with `_` are skipped, so shared helpers can live next to the
 scripts. When two folders hold a script with the same name, the first one
 wins.
@@ -61,6 +62,39 @@ Building again updates the existing node group in place, so modifiers using
 it keep it. A `node_group_name` parameter, if a script defines one, overrides
 the group name. Node scripts need nodebpy to be importable in Blender; it is
 not bundled.
+
+## Node groups as scripts
+
+Instead of keeping node groups in an asset library, you can keep them as
+Python files that Script Runner defines in every file you open.
+
+**Export:** right-click in a node editor and choose **Export Node Group to
+Script**. It exports the selected group node's group, or else the group being
+edited, and asks where to save. The file is nodebpy code (via
+`nodebpy.export.to_python`) with one class per group, so groups the exported
+one uses are written out too. **Keep Layout** stores node positions; without
+it the group is arranged automatically when built. Nodes nodebpy can't
+convert are written as `# TODO` placeholders, and you get a warning saying
+how many.
+
+**Define:** add the folder as a *Node Groups* folder in the preferences (or
+save into the extension's own `node_groups/` folder). After Blender starts and
+whenever a file is opened, every group those files define that the open file
+doesn't have yet is created. Groups that already exist are left alone, so
+opening an old file never changes it. Turn this off with **Define Node Groups
+on Load**.
+
+**Rebuild:** after editing a file, use **Rebuild All** in the Script
+Browser's Node Groups box. Each group is rebuilt with
+`nodebpy.live.run_source`: modifiers, group nodes and modifier input values
+stay attached to it. A group you changed by hand in Blender since it was
+built is kept as `<name> (edited)`. **Add Missing** does the same as the
+on-load step.
+
+Defined groups are ordinary local data: a file you save keeps its copy, and
+groups nothing uses are dropped when the file is saved, then defined again
+on the next load. Needs nodebpy (`to_python` and `nodebpy.live` arrived in
+the 520.x series; tested with 530.0.3).
 
 ## Parameter types
 
