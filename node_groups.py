@@ -236,6 +236,9 @@ class SCRIPT_RUNNER_OT_export_node_group(bpy.types.Operator):
         if tree is None:
             self.report({"ERROR"}, "No node group to export")
             return {"CANCELLED"}
+        if not self.filepath or os.path.basename(self.filepath) in ("", ".py"):
+            self.report({"ERROR"}, "No file to export to")
+            return {"CANCELLED"}
         path = bpy.path.ensure_ext(bpy.path.abspath(self.filepath), ".py")
         try:
             source, todos = export_source(tree, keep_layout=self.keep_layout)
@@ -299,8 +302,12 @@ def define_quietly():
 
 def draw_context_menu(self, context):
     if _export_target(context, "") is not None:
-        self.layout.separator()
-        self.layout.operator(SCRIPT_RUNNER_OT_export_node_group.bl_idname, icon="EXPORT")
+        layout = self.layout
+        layout.separator()
+        # The menu's own items leave operator_context at EXEC_*, which would
+        # skip invoke() (and the file browser) and run with no filepath.
+        layout.operator_context = "INVOKE_DEFAULT"
+        layout.operator(SCRIPT_RUNNER_OT_export_node_group.bl_idname, icon="EXPORT")
 
 
 classes = (
